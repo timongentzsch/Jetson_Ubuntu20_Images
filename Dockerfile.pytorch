@@ -1,0 +1,54 @@
+FROM timongentzsch/l4t-ubuntu20-base
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+ARG PYTORCH_URL=https://nvidia.box.com/shared/static/h1z9sw4bb1ybi0rm3tu8qdj8hs05ljbm.whl
+ARG PYTORCH_WHL=torch-1.9.0-cp36-cp36m-linux_aarch64.whl
+ARG TORCH_CUDA_ARCH_LIST=5.3;6.2;7.2
+ARG TORCHVISION_VERSION=v0.10.0
+ARG TORCHAUDIO_VERSION=v0.9.0
+ARG BUILD_SOX=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends python3-pip python3.6-dev libopenblas-dev libopenmpi2 openmpi-bin openmpi-common gfortran && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+
+RUN pip3 install --no-cache-dir setuptools Cython wheel
+RUN pip3 install --no-cache-dir numpy
+
+RUN wget --quiet --show-progress --progress=bar:force:noscroll --no-check-certificate ${PYTORCH_URL} -O ${PYTORCH_WHL} && \
+    pip3 install --no-cache-dir --verbose ${PYTORCH_WHL} && \
+    rm ${PYTORCH_WHL}
+
+RUN apt-get update && apt-get install -y --no-install-recommends git build-essential libjpeg-dev zlib1g-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential cmake gcc-8 g++-8 && \
+     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 8 && \
+     update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 8
+
+RUN git clone -b ${TORCHVISION_VERSION} https://github.com/pytorch/vision torchvision && \
+    cd torchvision && \
+    python3 setup.py install && \
+    cd ../ && \
+    rm -rf torchvision && \
+    pip3 install --no-cache-dir pillow
+
+RUN apt-get update && apt-get install -y --no-install-recommends cmake sox libsox-dev libsox-fmt-all && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+RUN pip3 install --no-cache-dir scikit-build && \
+    pip3 install --no-cache-dir ninja
+
+RUN git clone --recursive https://github.com/pytorch/audio torchaudio && \
+    cd torchaudio && \
+    python3 setup.py install && \
+    cd ../ && \
+    rm -rf torchaudio
+
+ENV PATH=/usr/local/cuda/bin:/usr/local/cuda-10.2/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda-10.2/targets/aarch64-linux/lib:
+
+CMD ["bash"]
+WORKDIR /root

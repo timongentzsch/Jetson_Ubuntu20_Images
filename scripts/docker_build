@@ -1,0 +1,83 @@
+#!/bin/bash
+
+show_help() {
+    echo "##########################################################"
+    echo "                                                          "
+    echo "  Usage: Builds the Docker image                          "
+    echo "                                                          "
+    echo "  docker_build  [dockerfile]                              "
+    echo "                -t, --tag     [image_tag]     (optional)  "
+    echo "                -b, --build   [buildcontext]  (optional)  "
+    echo "                                                          "
+    echo "##########################################################"
+}
+
+die() {
+    printf '%s\n' "$1"
+    show_help
+    exit 1
+}
+
+POSITIONAL=()
+TAG=""
+BUILD_CONTEXT=""
+
+while [[ $# -gt 0 ]]; do
+  key="$1"
+
+  case $key in
+    -t|--tag)
+      if [ "$2" ]; then
+        TAG="--tag $2"
+        shift
+        shift
+      else
+        die 'ERROR: "--tag" requires a non-empty option argument.'
+        shift
+      fi
+      ;;
+    -h|--help)
+      die
+      ;;
+    -b|--build)
+      if [ "$2" ]; then
+        BUILD_CONTEXT="$2"
+        shift
+        shift
+      else
+        die 'ERROR: "--buildcontext" requires a non-empty option argument. (default= current working directory)'
+        shift
+      fi
+      ;;
+    *)    
+      POSITIONAL+=("$1") # save it in an array for later
+      shift # past argument
+      ;;
+  esac
+done
+
+if [ ${#POSITIONAL[@]} -eq 0 ]; then   
+  die 'ERROR: need to specify a dockerimage to build'
+else
+  if [[ "${POSITIONAL[0]}" = /* ]]; then
+    DOCKERFILE=${POSITIONAL[0]}
+  else
+    DOCKERFILE="$(pwd)/${POSITIONAL[0]}"
+  fi
+fi
+
+if [ -z "$BUILD_CONTEXT" ]; then
+  BUILD_CONTEXT="${DOCKERFILE%/*}/"
+else
+  if ![[ "$BUILD_CONTEXT" = /* ]]; then
+    BUILD_CONTEXT="$(pwd)/$BUILD_CONTEXT"
+  fi
+fi
+
+
+echo "Building image from $DOCKERFILE..."
+
+sudo docker build \
+	--build-arg USER_ID=$(id -u) \
+	--build-arg GROUP_ID=$(id -g) \
+	$TAG -f $DOCKERFILE $BUILD_CONTEXT

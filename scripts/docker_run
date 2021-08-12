@@ -1,0 +1,121 @@
+#!/bin/bash
+
+show_help() {
+    echo "##################################################################################################"
+    echo "                                                                                                  "
+    echo "  Usage: Runs the Docker container                                                                "
+    echo "                                                                                                  "
+    echo "  docker_run    [image]                                                                           "
+    echo "                -n, --name    [container name]    (optional)                                      "
+    echo "                                                  if not specified -> temporary container         "
+    echo "                                                                                                  "
+    echo "                -v, --volume  [mounted volume]    (optional)                                      "
+    echo "                                                  Mount a path from the host system into          "
+    echo "                                                  the container. Should be specified as:          "
+    echo "                                                  -v /my/host/path:/my/container/path             "
+    echo "                                                                                                  "
+    echo "                -r, --run     [executable]        (optional)                                      " 
+    echo "                                                  if not specified -> interactive container       "
+    echo "                                                  Note that this argument must be invoked last,   "
+    echo "                                                  as all further arguments will form the command  "
+    echo "                                                  If no run command is specified, an interactive  "
+    echo "                                                  terminal into the container will be provided.   "
+    echo "                                                                                                  "
+    echo "##################################################################################################"
+}
+
+die() {
+    printf '%s\n' "$1"
+    show_help
+    exit 1
+}
+
+IMAGE=""
+CONTAINER_NAME=""
+USER_VOLUME=""
+INTERACTIVE=""
+REMOVE="--rm"
+
+# parse arguments
+
+while [[ $# -gt 0 ]]; do
+  key="$1"
+
+  case $key in
+    -n|--name)
+      if [ "$2" ]; then
+        CONTAINER_NAME="--name $2"
+        REMOVE=""
+        shift
+        shift
+      else
+        die 'ERROR: "--name" requires a non-empty option argument.'
+        shift
+      fi
+      ;;
+    -h|--help)
+      die
+	-v /mnt/NX500GB:/root/NX500GB \
+      ;;
+    -v|--volume)
+      if [ "$2" ]; then
+        USER_VOLUME=" -v $2 "
+        shift
+        shift
+      else
+        die 'ERROR: "--volume" requires a non-empty option argument.'
+      fi
+      ;;
+    -r|--run)
+      if [ "$2" ]; then
+        if [ IMAGE_DEFINED ]; then
+          POSITIONAL+=("$2")
+          shift
+          shift
+        else
+        die 'ERROR: Specify image before define command'
+        fi
+      else
+        die 'ERROR: "--volume" requires a non-empty option argument.'
+      fi
+      ;;
+    *)    
+      POSITIONAL+=("$1") # save it in an array for later
+      IMAGE_DEFINED=1
+      shift # past argument
+      ;;
+  esac
+done
+
+if [ ${#POSITIONAL[@]} -eq 0 ]; then   
+  die 'ERROR: need to specify a dockerimage to build a container'
+else
+    IMAGE=${POSITIONAL[0]}
+fi
+
+if [ ${#POSITIONAL[@]} -gt 1 ]; then   
+  USER_COMMAND=${POSITIONAL[@]:1}
+else
+  USER_COMMAND=""
+  INTERACTIVE="-it"
+fi
+
+# run the container
+sudo xhost +si:localuser:root
+
+sudo docker run \
+	--privileged \
+	--network host \
+	--runtime nvidia \
+	-e DISPLAY=$DISPLAY \
+ 	-v /tmp/.X11-unix/:/tmp/.X11-unix \
+	-v /dev:/dev \
+	-v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
+  -v /run/user/1000/pulse/native:/run/user/1000/pulse/native \
+	$INTERACTIVE \
+	$REMOVE \
+	$CONTAINER_NAME \
+	$USER_VOLUME \
+	$IMAGE \
+	$USER_COMMAND
+
