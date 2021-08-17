@@ -1,0 +1,66 @@
+FROM timongentzsch/l4t-ubuntu20-base
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+ARG TORCH_CUDA_ARCH_LIST=5.3;6.2;7.2
+ARG TORCHVISION_VERSION=v0.10.0
+ARG TORCHAUDIO_VERSION=v0.9.0
+ARG BUILD_SOX=1
+
+ARG USE_NCCL=0
+ARG USE_DISTRIBUTED=0
+ARG USE_QNNPACK=0
+ARG USE_PYTORCH_QNNPACK=0
+ARG PYTORCH_BUILD_VERSION=1.9.0
+ARG PYTORCH_BUILD_NUMBER=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential cmake gcc-8 g++-8 && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 8 && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 8 && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+
+RUN apt-get update && apt-get install -y --no-install-recommends python3-pip python3-dev cmake libopenblas-dev git && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+
+RUN pip3 install scikit-build
+RUN pip3 install ninja
+
+# pytorch
+RUN git clone --recursive https://github.com/pytorch/pytorch -b v$PYTORCH_BUILD_VERSION && \
+    cd pytorch && \
+    pip3 install -r requirements.txt
+
+COPY assets/pytorch-1.9.patch /root/pytorch
+RUN cd /root/pytorch/ && git apply pytorch-1.9.patch
+
+RUN cd pytorch && \
+    pip3 install -r requirements.txt && \
+    python3 setup.py install
+
+# torchvision
+RUN apt-get update && apt-get install -y --no-install-recommends libjpeg-dev zlib1g-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+
+RUN git clone -b ${TORCHVISION_VERSION} https://github.com/pytorch/vision torchvision && \
+    cd torchvision && \
+    python3 setup.py install
+RUN pip3 install --no-cache-dir pillow
+
+
+# torchaudio
+RUN apt-get update && apt-get install -y --no-install-recommends sox libsox-dev libsox-fmt-all && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+
+RUN git clone --recursive https://github.com/pytorch/audio torchaudio && \
+    cd torchaudio && \
+    python3 setup.py install
+
+ENV PATH=/usr/local/cuda/bin:/usr/local/cuda-10.2/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda-10.2/targets/aarch64-linux/lib:
+
+CMD ["bash"]
+WORKDIR /root

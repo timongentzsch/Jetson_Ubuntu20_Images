@@ -10,14 +10,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean
 
+# legacy
 RUN add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y --no-install-recommends python3.6 && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean
-
-# set python3 default to python3.6
-# RUN ln -sf /usr/bin/python3.6 /usr/bin/python3
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends bc bzip2 can-utils freeglut3-dev gstreamer1.0-alsa gstreamer1.0-libav gstreamer1.0-plugins-bad \
