@@ -1,24 +1,98 @@
-FROM timongentzsch/l4t-ubuntu20-base
+FROM timongentzsch/l4t-ubuntu20-opencv
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y curl gnupg2 lsb-release
-RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key  -o /usr/share/keyrings/ros-archive-keyring.gpg
+ARG ROS_PKG=ros_base
+ARG ROS_DISTRO=galactic
+ARG ROS_ROOT=/opt/ros/${ROS_DISTRO}
+
+#
+# change the locale from POSIX to UTF-8
+#
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    locales \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+RUN locale-gen en_US en_US.UTF-8 && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV PYTHONIOENCODING=utf-8
+
+# 
+# add the ROS deb repo to the apt sources list
+#
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+		curl \
+		wget \
+		gnupg2 \
+		lsb-release \
+		ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
-RUN apt-get update && apt-get install -y ros-foxy-ros-base && \
-	echo source /opt/ros/foxy/setup.bash >> /root/.bashrc && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
 
-# colcon / rosdep
-RUN echo "deb [arch=amd64,arm64] http://repo.ros2.org/ubuntu/main `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list
-RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
+# 
+# install development packages
+#
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+		build-essential \
+		cmake \
+		git \
+		python3-colcon-common-extensions \
+		python3-pip \
+		python3-numpy \
+		python3-rosdep \
+		python3-setuptools \
+		python3-vcstool \
+		python3-rosinstall-generator \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-RUN apt-get update && apt-get install -y python3-colcon-common-extensions python3-rosdep && \
+# 
+# download/build ROS from source
+#
+RUN mkdir -p ${ROS_ROOT}/src && \
+    cd ${ROS_ROOT} && \
+    rosinstall_generator --deps --rosdistro ${ROS_DISTRO} ${ROS_PKG} \
+		example_interfaces \
+		camera_calibration_parsers \
+		camera_info_manager \
+		cv_bridge \
+		v4l2_camera \
+		vision_opencv \
+		vision_msgs \
+		image_geometry \
+		image_pipeline \
+		image_transport \
+		compressed_image_transport \
+		compressed_depth_image_transport \
+		> ros2.${ROS_DISTRO}.${ROS_PKG}.rosinstall && \
+    cat ros2.${ROS_DISTRO}.${ROS_PKG}.rosinstall && \
+    vcs import src < ros2.${ROS_DISTRO}.${ROS_PKG}.rosinstall && \
+    apt-get update && \
+    cd ${ROS_ROOT} && \
+    rosdep init && \
+    rosdep update && \
+    rosdep install -y \
+        --ignore-src \
+        --from-paths src \
+	    --rosdistro ${ROS_DISTRO} \
+	    --skip-keys "libopencv-dev libopencv-contrib-dev libopencv-imgproc-dev python-opencv python3-opencv" && \
     rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
-RUN rosdep init && rosdep update
+    apt-get clean && \
+    colcon build --merge-install && \
+    rm -rf ${ROS_ROOT}/src && \
+    rm -rf ${ROS_ROOT}/logs && \
+    rm -rf ${ROS_ROOT}/build && \
+    rm ${ROS_ROOT}/*.rosinstall
+
+# source ROS
+RUN echo "source /opt/ros/${ROS_DISTRO}/install/setup.bash" >> /root/.bashrc
 
 CMD ["bash"]
 WORKDIR /root

@@ -14,6 +14,9 @@ ARG USE_PYTORCH_QNNPACK=0
 ARG PYTORCH_BUILD_VERSION=1.9.0
 ARG PYTORCH_BUILD_NUMBER=1
 
+# 
+# required for cuda compiler
+#
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential cmake gcc-8 g++-8 && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 8 && \
     update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 8 && \
@@ -27,7 +30,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3-pip pyt
 RUN pip3 install scikit-build
 RUN pip3 install ninja
 
+#
 # pytorch
+#
 RUN git clone --recursive https://github.com/pytorch/pytorch -b v$PYTORCH_BUILD_VERSION && \
     cd pytorch && \
     pip3 install -r requirements.txt
@@ -39,7 +44,9 @@ RUN cd pytorch && \
     pip3 install -r requirements.txt && \
     python3 setup.py install
 
+#
 # torchvision
+#
 RUN apt-get update && apt-get install -y --no-install-recommends libjpeg-dev zlib1g-dev && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean
@@ -49,8 +56,9 @@ RUN git clone -b ${TORCHVISION_VERSION} https://github.com/pytorch/vision torchv
     python3 setup.py install
 RUN pip3 install --no-cache-dir pillow
 
-
+#
 # torchaudio
+#
 RUN apt-get update && apt-get install -y --no-install-recommends sox libsox-dev libsox-fmt-all && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean
