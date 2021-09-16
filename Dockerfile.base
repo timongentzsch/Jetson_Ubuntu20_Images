@@ -10,32 +10,19 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean
 
-# legacy
-RUN add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends python3.6 && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
-
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends bc bzip2 can-utils freeglut3-dev gstreamer1.0-alsa gstreamer1.0-libav gstreamer1.0-plugins-bad \
-    gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-tools i2c-tools iw kbd language-pack-en-base \
-    libcanberra-gtk3-module libgles2 libglu1-mesa-dev libglvnd-dev libgtk-3-0 libpython2.7 libudev1 libvulkan1 libzmq5 mtd-utils \
-    parted pciutils python python-pexpect python3-distutils sox udev vulkan-utils wget wireless-tools wpasupplicant unzip pkg-config && \
+    apt-get install -y libglu1-mesa-dev freeglut3 freeglut3-dev unzip dialog && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean
 
-RUN echo "/usr/lib/aarch64-linux-gnu/tegra" >> /etc/ld.so.conf.d/nvidia-tegra.conf &&     echo "/usr/lib/aarch64-linux-gnu/tegra-egl" >> /etc/ld.so.conf.d/nvidia-tegra.conf
+RUN echo "/usr/lib/aarch64-linux-gnu/tegra" >> /etc/ld.so.conf.d/nvidia-tegra.conf && \
+    echo "/usr/lib/aarch64-linux-gnu/tegra-egl" >> /etc/ld.so.conf.d/nvidia-tegra.conf
 RUN rm /usr/share/glvnd/egl_vendor.d/50_mesa.json
-RUN mkdir -p /usr/share/glvnd/egl_vendor.d/ && echo '{    "file_format_version" : "1.0.0",    "ICD" : {        "library_path" : "libEGL_nvidia.so.0"    }}' > /usr/share/glvnd/egl_vendor.d/10_nvidia.json
-RUN mkdir -p /usr/share/egl/egl_external_platform.d/ && echo '{    "file_format_version" : "1.0.0",    "ICD" : {        "library_path" : "libnvidia-egl-wayland.so.1"    }}' > /usr/share/egl/egl_external_platform.d/nvidia_wayland.json
+RUN mkdir -p /usr/share/glvnd/egl_vendor.d/ && \
+    echo '{"file_format_version" : "1.0.0" , "ICD" : { "library_path" : "libEGL_nvidia.so.0" }}' > /usr/share/glvnd/egl_vendor.d/10_nvidia.json
+RUN mkdir -p /usr/share/egl/egl_external_platform.d/ && \
+    echo '{"file_format_version" : "1.0.0" , "ICD" : { "library_path" : "libnvidia-egl-wayland.so.1" }}' > /usr/share/egl/egl_external_platform.d/nvidia_wayland.json
 RUN echo "/usr/local/cuda-$CUDA/targets/aarch64-linux/lib" >> /etc/ld.so.conf.d/nvidia.conf
-
-COPY assets/r${L4T_RELEASE}_L4T.zip /usr/local
-COPY assets/bionic_sources.list /etc/apt/sources.list.d
-
-RUN unzip /usr/local/r${L4T_RELEASE}_L4T.zip -d /usr/local/ && rm -rf /usr/local/r${L4T_RELEASE}_L4T.zip
-RUN ln -s /usr/local/cuda-$CUDA /usr/local/cuda
 
 ENV PATH /usr/local/cuda-$CUDA/bin:/usr/local/cuda/bin:${PATH}
 ENV LD_LIBRARY_PATH /usr/local/cuda-$CUDA/targets/aarch64-linux/lib:${LD_LIBRARY_PATH}
@@ -45,6 +32,13 @@ RUN ldconfig
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES all
 ENV OPENBLAS_CORETYPE=ARMV8
+
+#
+# Update environment
+#
+ENV LD_LIBRARY_PATH=/opt/nvidia/vpi1/lib64:${LD_LIBRARY_PATH}
+ENV LD_LIBRARY_PATH=/usr/lib/aarch64-linux-gnu/tegra:${LD_LIBRARY_PATH}
+ENV LD_LIBRARY_PATH=/usr/lib/aarch64-linux-gnu/tegra-egl:${LD_LIBRARY_PATH}
 
 CMD ["bash"]
 WORKDIR /root

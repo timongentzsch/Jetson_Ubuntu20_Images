@@ -6,16 +6,13 @@ Furthermore the [script](scripts) folder includes system installable run-scripts
 
 The following images can be directly pulled from DockerHub without needing to build the containers yourself:
 
-|                                                                                     | L4T Version | Container Tag                                      |
-|-------------------------------------------------------------------------------------|:-----------:|----------------------------------------------------|
+|                                                                                                 | L4T Version | Container Tag                                      |
+|-------------------------------------------------------------------------------------------------|:-----------:|----------------------------------------------------|
 | [`l4t-ubuntu20-base`](Dockerfile.base)           							                      |   R32.6.1   | `timongentzsch/l4t-ubuntu20-base:latest`           |
-|                                                                                     |   R32.5.0   |                                                    |
-| [`l4t-ubuntu20-pytorch`](Dockerfile.pytorch)									                      |   R32.6.1   | `timongentzsch/l4t-ubuntu20-pytorch:latest`        |
-|                                                                                     |   R32.5.0   |                                                    |
-| [`l4t-ubuntu20-ros2`](Dockerfile.ros2)									                            |   R32.6.1   | `timongentzsch/l4t-ubuntu20-ros2:latest`           |
-|                                                                                     |   R32.5.0   |                                                    |
-| [`l4t-ubuntu20-zedsdk`](Dockerfile.zedsdk) 									                        |   R32.6.1   | `timongentzsch/l4t-ubuntu20-zedsdk:latest`         |
-|                                                                                     |   R32.5.0   | 											                             |
+| [`l4t-ubuntu20-zedsdk`](Dockerfile.opencv) 									                  |   R32.6.1   | `timongentzsch/l4t-ubuntu20-opencv:latest`         |
+| [`l4t-ubuntu20-pytorch`](Dockerfile.pytorch)									                  |   R32.6.1   | `timongentzsch/l4t-ubuntu20-pytorch:latest`        |
+| [`l4t-ubuntu20-ros2`](Dockerfile.ros2)									                      |   R32.6.1   | `timongentzsch/l4t-ubuntu20-ros2:latest`           |
+| [`l4t-ubuntu20-zedsdk`](Dockerfile.zedsdk) 									                  |   R32.6.1   | `timongentzsch/l4t-ubuntu20-zedsdk:latest`         |
 
 
 > **note:** make sure to run the container on the intended L4T host system. Running on older JetPack releases (e.g. r32.4.4) can cause driver issues, since L4T drivers are passed into the container.
@@ -48,7 +45,7 @@ You will then want to restart the Docker service or reboot your system before pr
 
 ## Build and test the images
 
-To rebuild the containers from a Jetson device running [JetPack 4.5.1](https://developer.nvidia.com/embedded/jetpack) or newer, first clone this repo:
+To rebuild the containers from a Jetson device, first clone this repo via [`Git LFS`](https://git-lfs.github.com/):
 
 ``` bash
 $ git clone https://github.com/timongentzsch/Jetson_Ubuntu20_Images.git
@@ -74,7 +71,7 @@ It ensures that the docker environment feels as native as possible by enabling t
 - sound
 - network
 - bluetooth
-- GPU
+- GPU/cuda
 - X11
 
 > **note:** refer to `--help` for the syntax
