@@ -9,7 +9,7 @@ The following images can be directly pulled from DockerHub without needing to bu
 |                                                                                                 | L4T Version | Container Tag                                      |
 |-------------------------------------------------------------------------------------------------|:-----------:|----------------------------------------------------|
 | [`l4t-ubuntu20-base`](Dockerfile.base)           							                      |   R32.6.1   | `timongentzsch/l4t-ubuntu20-base:latest`           |
-| [`l4t-ubuntu20-zedsdk`](Dockerfile.opencv) 									                  |   R32.6.1   | `timongentzsch/l4t-ubuntu20-opencv:latest`         |
+| [`l4t-ubuntu20-opencv`](Dockerfile.opencv) 									                  |   R32.6.1   | `timongentzsch/l4t-ubuntu20-opencv:latest`         |
 | [`l4t-ubuntu20-pytorch`](Dockerfile.pytorch)									                  |   R32.6.1   | `timongentzsch/l4t-ubuntu20-pytorch:latest`        |
 | [`l4t-ubuntu20-ros2`](Dockerfile.ros2)									                      |   R32.6.1   | `timongentzsch/l4t-ubuntu20-ros2:latest`           |
 | [`l4t-ubuntu20-zedsdk`](Dockerfile.zedsdk) 									                  |   R32.6.1   | `timongentzsch/l4t-ubuntu20-zedsdk:latest`         |
