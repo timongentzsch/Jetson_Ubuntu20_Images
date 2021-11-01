@@ -3,7 +3,6 @@ FROM timongentzsch/l4t-ubuntu20-opencv
 ARG DEBIAN_FRONTEND=noninteractive
 
 ARG ROS_PKG=ros_base
-ARG ROS_DISTRO=galactic
 ARG ROS_ROOT=/opt/ros/${ROS_DISTRO}
 
 #
@@ -17,6 +16,8 @@ RUN apt-get update && \
 RUN locale-gen en_US en_US.UTF-8 && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV PYTHONIOENCODING=utf-8
+ENV ROS_DISTRO=galactic
+ENV ROS_LOCALHOST_ONLY=0
 
 # 
 # add the ROS deb repo to the apt sources list
