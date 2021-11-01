@@ -1,8 +1,11 @@
+ARG L4T_RELEASE=32.6.1
+
+FROM nvcr.io/nvidia/l4t-base:r${L4T_RELEASE} as nvcr-cuda10
+
 FROM ubuntu:focal
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG CUDA=10.2
-ARG L4T_RELEASE=32.6.1
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends apt-utils software-properties-common && \
@@ -32,6 +35,12 @@ RUN ldconfig
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES all
 ENV OPENBLAS_CORETYPE=ARMV8
+
+#
+# in normal use this directory is mounted from host by nvidia-container-runtime.
+# but to be able to cross compile we copy this directory from nvidia docker
+#
+COPY --from=nvcr-cuda10 /usr/local/cuda-10.2 /usr/local/cuda-10.2
 
 #
 # Update environment
