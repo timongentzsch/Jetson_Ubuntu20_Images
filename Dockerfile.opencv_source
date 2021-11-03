@@ -3,6 +3,8 @@ FROM timongentzsch/l4t-ubuntu20-base
 ARG DEBIAN_FRONTEND=noninteractive
 ARG OPEN_CV_VERSION=4.5.0
 
+### TODO: Add multistagebuild with crosscompile image ###
+
 # 
 # install opencv deps
 #

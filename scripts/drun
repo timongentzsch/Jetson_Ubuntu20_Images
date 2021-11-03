@@ -1,0 +1,125 @@
+#!/bin/bash
+
+show_help() {
+    echo "###################################################################################################"
+    echo "                                                                                                   "
+    echo "  Usage: Runs the Docker container                                                                 "
+    echo "                                                                                                   "
+    echo "  docker_run    [image]                                                                            "
+    echo "                -n, --name    [container name]    (optional)                                       "
+    echo "                                                  if not specified -> temporary container          "
+    echo "                                                                                                   "
+    echo "                -d, --docker-arg  [arg]           (optional)                                       "
+    echo "                                                  Give additional docker runtime arguments to the  "
+    echo "                                                  the container. Should be specified as:           "
+    echo "                                                  -d arg1 or -d \"arg1 arg2\"                      "
+    echo "                                                                                                   "
+    echo "                -r, --run         [executable]    (optional)                                       " 
+    echo "                                                  if not specified -> interactive container        "
+    echo "                                                  Note that this argument must be invoked last,    "
+    echo "                                                  as all further arguments will form the command   "
+    echo "                                                  If no run command is specified, an interactive   "
+    echo "                                                  terminal into the container will be provided.    "
+    echo "                                                                                                   "
+    echo "###################################################################################################"
+}
+
+die() {
+    printf '%s\n' "$1"
+    show_help
+    exit 1
+}
+
+IMAGE=""
+CONTAINER_NAME=""
+REMOVE="--rm"
+DOCKER_ARGS+=("-it")
+
+# parse arguments
+
+while [[ $# -gt 0 ]]; do
+  key="$1"
+
+  case $key in
+    -n|--name)
+      if [ "$2" ]; then
+        CONTAINER_NAME="--name $2"
+        REMOVE=""
+        shift
+        shift
+      else
+        die 'ERROR: "--name" requires a non-empty option argument.'
+        shift
+      fi
+      ;;
+    -h|--help)
+      die
+      ;;
+    -d|--docker-arg)
+      if [ "$2" ]; then
+        DOCKER_ARGS+=("$2")
+        shift
+        shift
+      else
+        die 'ERROR: "--volume" requires a non-empty option argument.'
+      fi
+      ;;
+    *)    
+      POSITIONAL+=("$1") # save it in an array for later
+      IMAGE_DEFINED=1
+      shift # past argument
+      ;;
+  esac
+done
+
+if [ ${#POSITIONAL[@]} -eq 0 ]; then   
+  die 'ERROR: need to specify a dockerimage to build a container'
+else
+    IMAGE=${POSITIONAL[0]}
+fi
+
+if [ ${#POSITIONAL[@]} -gt 1 ]; then   
+  USER_COMMAND=${POSITIONAL[@]:1}
+else
+  USER_COMMAND=""
+fi
+
+# Map host's display socket to docker
+DOCKER_ARGS+=("-v /tmp/.X11-unix:/tmp/.X11-unix")
+DOCKER_ARGS+=("-e DISPLAY")
+DOCKER_ARGS+=("-e NVIDIA_DRIVER_CAPABILITIES=all")
+DOCKER_ARGS+=("-e NVIDIA_VISIBLE_DEVICES=all")
+
+# device and audio passtrough
+DOCKER_ARGS+=("-v /dev:/dev")
+DOCKER_ARGS+=("-v /mnt:/mnt")
+DOCKER_ARGS+=("-v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket")
+DOCKER_ARGS+=("-e PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native")
+DOCKER_ARGS+=("-v ${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native")
+DOCKER_ARGS+=("-v ${HOME}/.config/pulse/cookie:/root/.config/pulse/cookie")
+
+# Mount Jetson cuda libs
+if [[ $PLATFORM == "aarch64" ]]; then
+    DOCKER_ARGS+=("--gpus all")
+    DOCKER_ARGS+=("-v /opt/nvidia:/opt/nvidia")
+    DOCKER_ARGS+=("-v /usr/bin/tegrastats:/usr/bin/tegrastats")
+    DOCKER_ARGS+=("-v /usr/share/vpi1:/usr/share/vpi1")
+    DOCKER_ARGS+=("-v /usr/lib/aarch64-linux-gnu/tegra:/usr/lib/aarch64-linux-gnu/tegra")
+    DOCKER_ARGS+=("-v /usr/local/cuda-10.2/targets/aarch64-linux/lib:/usr/local/cuda-10.2/targets/aarch64-linux/lib")
+    DOCKER_ARGS+=("-v /usr/lib/aarch64-linux-gnu/tegra-egl:/usr/lib/aarch64-linux-gnu/tegra-egl")
+    DOCKER_ARGS+=("-v /usr/lib/aarch64-linux-gnu/libcudnn.so.8.2.1:/usr/lib/aarch64-linux-gnu/libcudnn.so.8.2.1")
+    DOCKER_ARGS+=("-v /dev/video*:/dev/video*")
+fi
+
+# run the container
+sudo xhost +si:localuser:root
+
+docker run \
+  --privileged \
+	--network host \
+  ${DOCKER_ARGS[@]} \
+	$REMOVE \
+	$CONTAINER_NAME \
+	$IMAGE \
+	$USER_COMMAND
+
