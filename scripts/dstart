@@ -8,6 +8,9 @@ show_help() {
     echo "  docker_start  [container name]              "
     echo "                                              "
     echo "##############################################"
+    echo ""
+    echo "Choose one of the following:"
+    sudo docker container ls -a
 }
 
 die() {
@@ -35,7 +38,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ -z "$CONTAINER_NAME" ]; then   
-  die 'ERROR: need to specify a containername to build a container'
+  die 'ERROR: need to specify a containername to run.'
 fi
 
 xhost +si:localuser:root

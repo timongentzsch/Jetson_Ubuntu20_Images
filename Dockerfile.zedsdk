@@ -1,4 +1,4 @@
-FROM timongentzsch/l4t-ubuntu20-base
+FROM timongentzsch/l4t-ubuntu20-opencv
 
 ENV LOGNAME root
 ARG DEBIAN_FRONTEND=noninteractive
