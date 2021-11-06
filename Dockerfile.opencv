@@ -4,30 +4,17 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG OPEN_CV_VERSION=4.5.0
 
 # 
-# install opencv debian packages first to avoid dependency problems
-#
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    libopencv-dev \
-    libopencv-contrib-dev && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
-
-# 
 # overwrite with cuda opencv
 #
 WORKDIR /tmp
 RUN --mount=target=/assets,type=bind,source=assets \
     cp /assets/OpenCV-${OPEN_CV_VERSION}-aarch64-ubuntu20.zip . && \
     unzip OpenCV-${OPEN_CV_VERSION}-aarch64-ubuntu20.zip && \
-    dpkg -i --force-depends --force-overwrite *.deb && \
-    apt-get update && \
-    apt-get install -y -f --no-install-recommends && \
-    dpkg -i --force-overwrite *.deb && \
+    apt update && \
+    apt install -y --no-install-recommends -f ./*.deb && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf * \
-    apt-get clean && \
-    ln -s /usr/include/opencv4 /usr/local/include/opencv
+    apt-get clean
 
 WORKDIR /root
 CMD ["bash"]
