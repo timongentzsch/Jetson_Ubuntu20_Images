@@ -39,11 +39,10 @@ EOT
 export -f docker_alias_completion_wrapper
 
 # Check if script is executed on Jetson platform
-CUDA_DIRECTORY="/usr/local/cuda-10-2"
+CUDA_DIRECTORY="/usr/local/cuda-10.2"
 IS_JETSON=false
 
-if [[ -d "$CUDA_DIRECTORY" && $PLATFORM == "aarch64" ]]; then
-    echo "Jetson detected"
+if [[ -d "$CUDA_DIRECTORY" ]]; then
     IS_JETSON=true
 fi
 
@@ -103,6 +102,7 @@ drun() {
     DOCKER_DEFAULT_ARGS+=("-e DISPLAY")
 
     # Device and audio passtrough
+    DOCKER_DEFAULT_ARGS+=("--network host")
     DOCKER_DEFAULT_ARGS+=("-v /dev:/dev")
     DOCKER_DEFAULT_ARGS+=("-v /mnt:/mnt")
     DOCKER_DEFAULT_ARGS+=("-v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket")
