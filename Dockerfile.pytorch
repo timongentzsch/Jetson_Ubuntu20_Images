@@ -1,7 +1,6 @@
 FROM timongentzsch/l4t-ubuntu20-opencv
 
 ARG DEBIAN_FRONTEND=noninteractive
-
 ARG BUILD_SOX=1
 
 # 
@@ -14,12 +13,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3-pip pyt
 # 
 # install prebuild pytorch binaries
 #
-COPY assets/torch-1.9.0-python3.8-aarch64.zip /root/torch-1.9.0-python3.8-aarch64.zip
-RUN unzip torch-1.9.0-python3.8-aarch64.zip && \
+WORKDIR /tmp/
+RUN --mount=target=/assets,type=bind,source=assets \
+    cp /assets/torch-1.9.0-python3.8-aarch64.zip . && \
+    unzip torch-1.9.0-python3.8-aarch64.zip && \
     pip3 install torch-1.9.0-cp38-cp38-linux_aarch64.whl \
         torchvision-0.10.0a0+300a8a4-cp38-cp38-linux_aarch64.whl \
         torchaudio-0.10.0a0+ee74056-cp38-cp38-linux_aarch64.whl && \
-    rm -rf *.whl *.zip
+    rm -rf *
 
 # 
 # install numpy via pip
