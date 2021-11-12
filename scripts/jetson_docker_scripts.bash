@@ -102,6 +102,7 @@ drun() {
     DOCKER_DEFAULT_ARGS+=("-e DISPLAY")
 
     # Device and audio passtrough
+    DOCKER_DEFAULT_ARGS+=("-e 'TERM=xterm-256color'")
     DOCKER_DEFAULT_ARGS+=("--network host")
     DOCKER_DEFAULT_ARGS+=("-v /dev:/dev")
     DOCKER_DEFAULT_ARGS+=("-v /mnt:/mnt")
@@ -142,6 +143,7 @@ dbuild() {
     DOCKER_BUILD_ARGS=()
 
     # Map group and user id
+    DOCKER_BUILD_ARGS+=("--network host")
     DOCKER_BUILD_ARGS+=("--build-arg USER_ID=$(id -u)")
 	DOCKER_BUILD_ARGS+=("--build-arg GROUP_ID=$(id -g)")
 
@@ -162,4 +164,4 @@ dstart() {
     }
 
 # Register completion function
-docker_alias_completion_wrapper __docker_complete_containers_all dbuild
+docker_alias_completion_wrapper __docker_complete_containers_all dstart
