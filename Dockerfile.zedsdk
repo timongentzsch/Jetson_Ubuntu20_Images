@@ -8,7 +8,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 #
 RUN apt-get update -y && apt-get install --no-install-recommends lsb-release wget less udev sudo apt-transport-https -y && \
     echo "# R32 (release), REVISION: 5.1" > /etc/nv_tegra_release ; \
-    wget -q --no-check-certificate -O ZED_SDK_Linux_JP.run https://download.stereolabs.com/zedsdk/3.5/jp45/jetsons && \
+    wget -q --no-check-certificate -O ZED_SDK_Linux_JP.run https://download.stereolabs.com/zedsdk/3.6/jp46/jetsons && \
     chmod +x ZED_SDK_Linux_JP.run ; ./ZED_SDK_Linux_JP.run silent && \
     rm -rf /usr/local/zed/resources/* \
     rm -rf ZED_SDK_Linux_JP.run && \
