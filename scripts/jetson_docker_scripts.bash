@@ -119,13 +119,7 @@ drun() {
         DOCKER_DEFAULT_ARGS+=("--gpus all")
         DOCKER_DEFAULT_ARGS+=("-e NVIDIA_DRIVER_CAPABILITIES=all")
         DOCKER_DEFAULT_ARGS+=("-e NVIDIA_VISIBLE_DEVICES=all")
-        DOCKER_DEFAULT_ARGS+=("-v /opt/nvidia:/opt/nvidia")
-        DOCKER_DEFAULT_ARGS+=("-v /usr/bin/tegrastats:/usr/bin/tegrastats")
-        DOCKER_DEFAULT_ARGS+=("-v /usr/share/vpi1:/usr/share/vpi1")
-        DOCKER_DEFAULT_ARGS+=("-v /usr/local/cuda-10.2/targets/aarch64-linux/lib:/usr/local/cuda-10.2/targets/aarch64-linux/lib")
-	DOCKER_DEFAULT_ARGS+=("-v /usr/lib/aarch64-linux-gnu/tegra:/usr/lib/aarch64-linux-gnu/tegra")
-        DOCKER_DEFAULT_ARGS+=("-v /usr/lib/aarch64-linux-gnu/tegra-egl:/usr/lib/aarch64-linux-gnu/tegra-egl")
-        DOCKER_DEFAULT_ARGS+=("-v /usr/lib/aarch64-linux-gnu/libcudnn.so.8.2.1:/usr/lib/aarch64-linux-gnu/libcudnn.so.8.2.1")
+        DOCKER_DEFAULT_ARGS+=("--runtime nvidia")
     fi
 
     echo "Container initialized with following arguments:"
