@@ -3,12 +3,6 @@
 # load docker completion
 _completion_loader docker;
 
-# Usage:
-#   docker_alias_completion_wrapper <completion function> <alias/function name>
-#
-# Example:
-#   dock-ip() { docker inspect --format '{{ .NetworkSettings.IPAddress }}' $@ ;}
-#   docker_alias_completion_wrapper __docker_complete_containers_running dock-ip
 function docker_alias_completion_wrapper {
   local completion_function="$1";
   local alias_name="$2";
@@ -36,19 +30,20 @@ EOT
   # Register the alias completion function
   complete -F _$alias_name $alias_name
 }
+
 export -f docker_alias_completion_wrapper
 
 # Check if script is executed on Jetson platform
 CUDA_DIRECTORY="/usr/local/cuda-10.2"
 IS_JETSON=false
 
-if [[ -d "$CUDA_DIRECTORY" ]]; then
+if [[ -d "$CUDA_DIRECTORY" ]] && [ "aarch64" == $(uname -m) ]; then
     IS_JETSON=true
 fi
 
-#
-# Custom docker scripts
-#
+###
+### Run Docker container
+###
 
 drun() {
     
@@ -93,7 +88,7 @@ drun() {
         echo "Using disposable container"
         echo ""
     else
-        echo "Saivng container under: $CONTAINER_NAME"
+        echo "Saving container under: $CONTAINER_NAME"
         echo ""
     fi
     
@@ -102,6 +97,7 @@ drun() {
     DOCKER_DEFAULT_ARGS+=("-e DISPLAY")
 
     # Device and audio passtrough
+    DOCKER_DEFAULT_ARGS+=("--privileged")
     DOCKER_DEFAULT_ARGS+=("-e 'TERM=xterm-256color'")
     DOCKER_DEFAULT_ARGS+=("--network host")
     DOCKER_DEFAULT_ARGS+=("-v /dev:/dev")
@@ -132,6 +128,10 @@ drun() {
 # Register completion function
 docker_alias_completion_wrapper _docker_container_run_and_create drun
 
+###
+### Build Docker container
+###
+
 dbuild() {
 
     DOCKER_BUILD_ARGS=()
@@ -144,11 +144,9 @@ dbuild() {
     docker build ${DOCKER_BUILD_ARGS[@]} $@ ;
     }
 
-# Register completion function
-docker_alias_completion_wrapper _docker_image_build dbuild
-
-# Register completion function
-docker_alias_completion_wrapper _docker_container_run_and_create drun
+###
+### Restart Docker container
+###
 
 dstart() {
 
@@ -159,3 +157,9 @@ dstart() {
 
 # Register completion function
 docker_alias_completion_wrapper __docker_complete_containers_all dstart
+
+# Register completion function
+docker_alias_completion_wrapper _docker_image_build dbuild
+
+# Register completion function
+docker_alias_completion_wrapper _docker_container_run_and_create drun
