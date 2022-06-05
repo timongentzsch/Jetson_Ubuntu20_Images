@@ -6,6 +6,11 @@ ARG OPEN_CV_VERSION=4.5.0
 # 
 # overwrite with cuda opencv
 #
+
+RUN apt-get update && apt-get install -y --no-install-recommends python3-pip python3-dev unzip && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+
 WORKDIR /tmp
 RUN --mount=target=/assets,type=bind,source=assets \
     cp /assets/OpenCV-${OPEN_CV_VERSION}-aarch64-ubuntu20.zip . && \
@@ -15,6 +20,9 @@ RUN --mount=target=/assets,type=bind,source=assets \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf * \
     apt-get clean
+
+#install missing numpy
+RUN pip3 install numpy
 
 WORKDIR /root
 CMD ["bash"]

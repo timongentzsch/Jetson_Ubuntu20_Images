@@ -2,6 +2,7 @@ FROM timongentzsch/l4t-ubuntu20-opencv
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG BUILD_SOX=1
+ARG PYTORCH_VERSION=1.11.0
 
 # 
 # install pytorch deps
@@ -10,22 +11,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3-pip pyt
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean
 
+SHELL ["/bin/bash", "-c", "-l"]
+
 # 
 # install prebuild pytorch binaries
 #
 WORKDIR /tmp/
 RUN --mount=target=/assets,type=bind,source=assets \
-    cp /assets/torch-1.9.0-python3.8-aarch64.zip . && \
-    unzip torch-1.9.0-python3.8-aarch64.zip && \
-    pip3 install torch-1.9.0-cp38-cp38-linux_aarch64.whl \
-        torchvision-0.10.0a0+300a8a4-cp38-cp38-linux_aarch64.whl \
-        torchaudio-0.10.0a0+ee74056-cp38-cp38-linux_aarch64.whl && \
+    cp /assets/torch-${PYTORCH_VERSION}-aarch64-ubuntu20.zip . && \
+    unzip torch-${PYTORCH_VERSION}-aarch64-ubuntu20.zip && \
+    pip3 install *.whl && \
     rm -rf *
 
 # 
-# install numpy via pip
+# install tensorrt python bindings
 #
-RUN pip3 install numpy --upgrade
+RUN --mount=target=/assets,type=bind,source=assets \
+    cp /assets/tensorrt-8.2.1.8-cp38-none-linux_aarch64.whl . && \
+    pip3 install *.whl && \
+    rm -rf *
 
 ENV PATH=/usr/local/cuda/bin:/usr/local/cuda-10.2/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda-10.2/targets/aarch64-linux/lib:

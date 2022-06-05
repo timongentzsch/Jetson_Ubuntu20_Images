@@ -1,4 +1,4 @@
-FROM timongentzsch/l4t-ubuntu20-crosscompile
+FROM timongentzsch/l4t-ubuntu20-base
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG OPEN_CV_VERSION=4.5.0
@@ -66,9 +66,9 @@ RUN cd opencv && \
           -D CPACK_SET_DESTDIR=OFF \
           -D CPACK_PACKAGING_INSTALL_PREFIX=/usr/local ..
 
-RUN make -j$(nproc)
-RUN make install
-RUN make package
+RUN cd opencv/release && make -j$(nproc)
+RUN cd opencv/release && make install
+RUN cd opencv/release && make package
 
 CMD ["bash"]
 WORKDIR /root

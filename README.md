@@ -17,16 +17,19 @@ The following images can be directly pulled from DockerHub without needing to bu
 
 |                        | L4T Version | Dockerhub image                                    |
 |------------------------|:-----------:|----------------------------------------------------|
-| [`l4t-ubuntu20-base`](Dockerfile.base) | R32.6.1 | `timongentzsch/l4t-ubuntu20-base:latest` |
-| [`l4t-ubuntu20-opencv`](Dockerfile.opencv) | R32.6.1 | `timongentzsch/l4t-ubuntu20-opencv:latest` |
-| [`l4t-ubuntu20-pytorch`](Dockerfile.pytorch) | R32.6.1 | `timongentzsch/l4t-ubuntu20-pytorch:latest` |
-| [`l4t-ubuntu20-ros2-base`](Dockerfile.ros2-base) | R32.6.1 | `timongentzsch/l4t-ubuntu20-ros2-base:latest` |
-| [`l4t-ubuntu20-ros2-desktop`](Dockerfile.ros2-desktop) | R32.6.1 | `timongentzsch/l4t-ubuntu20-ros2-desktop:latest` |
-| [`l4t-ubuntu20-zedsdk`](Dockerfile.zedsdk) | R32.6.1 | `timongentzsch/l4t-ubuntu20-zedsdk:latest` |
-| [`l4t-ubuntu20-crosscompile`](Dockerfile.crosscompile) | R32.6.1 | `timongentzsch/l4t-ubuntu20-crosscompile:latest` |
+| [`l4t-ubuntu20-base`](Dockerfile.base) | R32.7.1 | `timongentzsch/l4t-ubuntu20-base:latest` |
+| [`l4t-ubuntu20-opencv`](Dockerfile.opencv) | R32.7.1 | `timongentzsch/l4t-ubuntu20-opencv:latest` |
+| [`l4t-ubuntu20-pytorch`](Dockerfile.pytorch) | R32.7.1 | `timongentzsch/l4t-ubuntu20-pytorch:latest` |
+| [`l4t-ubuntu20-ros2-base`](Dockerfile.ros2-base) | R32.7.1 | `timongentzsch/l4t-ubuntu20-ros2-base:latest` |
+| [`l4t-ubuntu20-ros2-desktop`](Dockerfile.ros2-desktop) | R32.7.1 | `timongentzsch/l4t-ubuntu20-ros2-desktop:latest` |
+| [`l4t-ubuntu20-zedsdk`](Dockerfile.zedsdk) | R32.7.1 | `timongentzsch/l4t-ubuntu20-zedsdk:latest` |
+| [`l4t-ubuntu20-crosscompile`](Dockerfile.crosscompile) | R32.7.1 | `timongentzsch/l4t-ubuntu20-crosscompile:latest` |
 
   
->  **note:** make sure to run the container on the intended L4T host system. Running on older JetPack releases (e.g. r32.4.4) can cause driver issues, since L4T drivers are passed into the container.
+>  **note:** make sure to run the container on the intended L4T host system. Running on older JetPack releases (e.g. r32.6.1) can cause driver issues, since L4T drivers are passed into the container.
+
+
+>  **note:** pytorch image also inckudes the python3.8 tensorrt bindings
 
   
 

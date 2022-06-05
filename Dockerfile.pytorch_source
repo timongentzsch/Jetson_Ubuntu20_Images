@@ -1,29 +1,19 @@
-FROM timongentzsch/l4t-ubuntu20-base
+FROM timongentzsch/l4t-ubuntu20-opencv-source
 
-ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
-ARG TORCH_CUDA_ARCH_LIST=5.3;6.2;7.2
-ARG TORCHVISION_VERSION=v0.10.0
-ARG TORCHAUDIO_VERSION=v0.9.0
-ARG BUILD_SOX=1
+ENV TORCH_CUDA_ARCH_LIST=5.3;6.2;7.2
+ENV BUILD_SOX=1
 
-ARG USE_NCCL=0
-ARG USE_DISTRIBUTED=0
-ARG USE_QNNPACK=0
-ARG USE_PYTORCH_QNNPACK=0
-ARG PYTORCH_BUILD_VERSION=1.9.0
-ARG PYTORCH_BUILD_NUMBER=1
+ENV USE_NCCL=0
+ENV USE_DISTRIBUTED=0
+ENV USE_QNNPACK=0
+ENV USE_PYTORCH_QNNPACK=0
+ENV PYTORCH_BUILD_VERSION=1.11.0
+ENV TORCHVISION_VERSION=v0.12.0
+ENV TORCHAUDIO_VERSION=v0.11.0
 
 ### TODO: Add multistagebuild with crosscompile image ###
-
-# 
-# required for cuda compiler
-#
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential cmake gcc-8 g++-8 && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 8 && \
-    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 8 && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
 
 RUN apt-get update && apt-get install -y --no-install-recommends python3-pip python3-dev cmake libopenblas-dev git && \
     rm -rf /var/lib/apt/lists/* && \
@@ -39,11 +29,13 @@ RUN git clone --recursive https://github.com/pytorch/pytorch -b v$PYTORCH_BUILD_
     cd pytorch && \
     pip3 install -r requirements.txt
 
-COPY assets/pytorch-1.9.patch /root/pytorch
-RUN cd /root/pytorch/ && git apply pytorch-1.9.patch
+RUN cd /root/pytorch/ && \
+    wget https://gist.githubusercontent.com/dusty-nv/ce51796085178e1f38e3c6a1663a93a1/raw/4f1a0f948150c91f877aa38075835df748c81fe5/pytorch-1.11-jetpack-5.0.patch && \
+    git apply *.patch
 
+ENV PYTORCH_BUILD_NUMBER=1
 RUN cd pytorch && \
-    pip3 install -r requirements.txt && \
+    python3 setup.py bdist_wheel && \
     python3 setup.py install
 
 #
@@ -55,7 +47,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libjpeg-dev zli
 
 RUN git clone -b ${TORCHVISION_VERSION} https://github.com/pytorch/vision torchvision && \
     cd torchvision && \
-    python3 setup.py install
+    python3 setup.py bdist_wheel
 RUN pip3 install --no-cache-dir pillow
 
 #
@@ -67,7 +59,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends sox libsox-dev 
 
 RUN git clone --recursive https://github.com/pytorch/audio torchaudio && \
     cd torchaudio && \
-    python3 setup.py install
+    python3 setup.py bdist_wheel
 
 ENV PATH=/usr/local/cuda/bin:/usr/local/cuda-10.2/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda-10.2/targets/aarch64-linux/lib:
