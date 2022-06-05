@@ -113,7 +113,7 @@ You may want to install the provided scripts to build, run and restart container
 
 ``` bash
 
-$ sudo scripts/install-scripts.sh
+$ sudo scripts/setup_launchscripts.sh
 
 ```
 
