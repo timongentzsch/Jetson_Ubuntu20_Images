@@ -46,6 +46,7 @@ fi
 ###
 
 drun() {
+    IS_ROOT_USER=true
     
     # Allow X11 access
     xhost +si:localuser:root
@@ -64,6 +65,7 @@ drun() {
 
     case $key in
         -u|--user)
+        IS_ROOT_USER=false
         DOCKER_USER_HOME="/home/$2"
         echo "Using User $2 with \$HOME=$DOCKER_USER_HOME"
         echo ""
@@ -109,6 +111,9 @@ drun() {
 
     # SSH keys
     DOCKER_DEFAULT_ARGS+=("-v ${HOME}/.ssh:$DOCKER_USER_HOME/.ssh")
+    if [[ $IS_ROOT_USER == true ]]; then
+        DOCKER_DEFAULT_ARGS+=("-v ${DUMMY_SSH_CONFIG}:$DOCKER_USER_HOME/.ssh/config")
+    fi
 
     # Mount Jetson cuda libs
     if [[ $IS_JETSON = true ]]; then
