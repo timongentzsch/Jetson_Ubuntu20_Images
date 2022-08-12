@@ -2,7 +2,7 @@
 SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 SCRIPT_PATH=$( echo "$SCRIPT_PATH" | sed 's/ /\\ /g')
 
-sudo chown ${SCRIPT_PATH}/dummy_root_SSH_config
+sudo chown root ${SCRIPT_PATH}/dummy_root_SSH_config
 sudo chmod 600 ${SCRIPT_PATH}/dummy_root_SSH_config
 
 if  grep -qxF "# Source jetson docker scripts" "$HOME/.bashrc" ; then
