@@ -119,7 +119,7 @@ $ sudo scripts/setup_launchscripts.sh
 
   
 
-This will enable you to quickly iterate your build process and application.
+This will enable you to quickly iterate your build process and application. Sudo is needed to create the `dummy_root_SSH_config` and enable SSH access for root users
 
   
 
