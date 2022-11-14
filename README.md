@@ -1,6 +1,13 @@
-# Hardware accelerated Docker images based on Ubuntu 20.04 for Jetson family
+ ---
+**Deprecation notice**
 
-  
+This repository will no longer be updated, since Nvidia started to provide its own Docker images based on Ubuntu 20 as of [JETPACK SDK 5.0.1](https://developer.nvidia.com/embedded/jetpack-sdk-501dp) ([Link to images](https://github.com/dusty-nv/jetson-containers)).
+
+Therefore, the Dockerfiles in this repository should only be used as reference if **CUDA 10.2** is a requirement.
+
+--- 
+
+# Hardware accelerated Docker images based on Ubuntu 20.04 for Jetson family
 
 Nvidia Jetson images are based on Ubuntu 18.04. However, many applications and projects utilizes libraries specific to Ubuntu 20.04. Therefore, this repository provides docker images based on [`ubuntu:focal`](Dockerfile.ros2), that are able to take full advantage of the Jetson hardware (Nano, Xavier NX, Xavier AGX and Xavier TX2). All images come with full CUDA support (passthrough from the host) including TensorRT (including python bindings) and VisionWorks.
 
